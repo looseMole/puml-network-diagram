@@ -1,0 +1,80 @@
+@startuml
+
+!define osaPuml https://raw.githubusercontent.com/Crashedmind/PlantUML-opensecurityarchitecture2-icons/master
+!include osaPuml/Common.puml
+!include osaPuml/User/all.puml
+!include osaPuml/Hardware/all.puml
+!include osaPuml/Misc/all.puml
+!include osaPuml/Server/all.puml
+!include osaPuml/Site/all.puml
+
+' Users
+together {
+osa_user_green_developer(Me, "Me", "Owner", "Developer")
+osa_user_blue(Wife, "Wife", "User", "User")
+}
+
+' Devices
+together {
+osa_desktop(pc, "10.0.249.1", "Windows 11", "PC")
+osa_desktop(wife_pc, "Dynamic IP", "Windows 11", "Wife's PC")
+osa_iPhone(iphone, "Dynamic IP", "iPhone 8", "Phone")
+osa_iPhone(android, "Dynamic IP", "Android", "Phone")
+osa_server(server, "10.0.0.2", "ProxMox", "Server")
+}
+
+server -d-|> proxmox_server
+
+package proxmox_server {
+    osa_device_wireless_router(OPNSense, "10.0.0.1", "OPNSense Router")
+    osa_media_optical(Jellyfin, "10.0.4.2", "Jellyfin LXC")
+    osa_server_terminal(Dockerhost, "10.0.4.1", "Debian Dockerhost")
+
+    package dockerhost {
+        osa_server_application(portainer, "", "Portainer")
+        osa_server_application(homarr, "", "Homarr")
+        osa_server_application(kuma, "", "Uptime Kuma")
+        osa_server_application(nginx, "", "NGINX")
+    }
+    Dockerhost --|> dockerhost
+}
+
+package oracle_cloud {
+    osa_server_terminal(dhost, "", "Debian docker host")
+    osa_server_application(mc_container, "", "Private Minecraft server")
+}
+
+' Network
+osa_device_wireless_router(wifiAP, "192.168.1.1", "ISP Router")
+osa_server(rPI, "10.0.0.100", "Raspberry Pi Pi-hole")
+osa_hub(hub, "Office hub", "Hub")
+osa_cloud(cloud, "Internet", "Network")
+osa_drive_harddisk(NAS, "10.0.0.3", "Synology NAS", "NAS")
+
+
+
+Me --> pc: programming, gaming
+Me --> android: social media
+
+Wife --> iphone: phone calls
+Wife --> wife_pc: games on
+
+
+Me --> server: configuration
+
+pc ..> OPNSense
+iphone ..> OPNSense
+android ..> OPNSense
+
+server --> hub
+wife_pc --> hub
+NAS -l-> hub
+
+OPNSense <-left-> rPI
+OPNSense -d-> wifiAP
+wifiAP -u-> OPNSense
+wifiAP <-right-> hub
+wifiAP --> cloud
+
+footer %filename() rendered with PlantUML version %version()\nThe Hitchhiker’s Guide to PlantUML
+@enduml
