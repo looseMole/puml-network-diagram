@@ -16,17 +16,17 @@ osa_user_blue(Wife, "Wife", "User", "User")
 
 ' Devices
 together {
-osa_desktop(pc, "10.0.249.1", "Windows 11", "PC")
+osa_desktop(pc, "10.0.249.1\n<color:#blue>100.85.17.111", "Windows 11", "PC")
 osa_desktop(wife_pc, "Dynamic IP", "Windows 11", "Wife's PC")
 osa_iPhone(iphone, "Dynamic IP", "iPhone 8", "Phone")
 osa_iPhone(android, "Dynamic IP", "Android", "Phone")
-osa_server(server, "10.0.0.2", "ProxMox", "Server")
+osa_server(server, "10.0.0.2\n<color:#blue>100.83.153.21", "ProxMox", "Server")
 }
 
 server -d-|> proxmox_server
 
 package proxmox_server {
-    osa_device_wireless_router(OPNSense, "10.0.0.1", "OPNSense Router")
+    osa_device_wireless_router(OPNSense, "10.0.0.1\n<color:#blue>100.93.25.87", "OPNSense Router")
     osa_media_optical(Jellyfin, "10.0.4.2", "Jellyfin LXC")
     osa_server_terminal(Dockerhost, "10.0.4.1", "Debian Dockerhost")
 
@@ -40,16 +40,22 @@ package proxmox_server {
 }
 
 package oracle_cloud {
-    osa_server_terminal(dhost, "", "Debian docker host")
-    osa_server_application(mc_container, "", "Private Minecraft server")
+    osa_server_terminal(dhost, "<color:#blue>100.79.199.35", "Debian docker host")
+    package dhost_containers {
+        osa_server_application(o_portainer, "", "Portainer")
+        osa_server_application(mc_router, "", "itzg/mc-router")
+        osa_server_application(mc_container, "", "Vanilla Minecraft server")
+        osa_server_application(yacili_container, "", "Fabric Minecraft server")
+    }
+   dhost -left-|> dhost_containers
 }
 
 ' Network
 osa_device_wireless_router(wifiAP, "192.168.1.1", "ISP Router")
-osa_server(rPI, "10.0.0.100", "Raspberry Pi Pi-hole")
+osa_server(rPI, "10.0.0.100\n<color:#blue>100.110.64.25", "Raspberry Pi Pi-hole")
 osa_hub(hub, "Office hub", "Hub")
+osa_drive_harddisk(NAS, "10.0.0.3\n<color:#blue>100.102.238.29", "Synology NAS", "NAS")
 osa_cloud(cloud, "Internet", "Network")
-osa_drive_harddisk(NAS, "10.0.0.3", "Synology NAS", "NAS")
 
 
 
@@ -75,6 +81,13 @@ OPNSense -d-> wifiAP
 wifiAP -u-> OPNSense
 wifiAP <-right-> hub
 wifiAP --> cloud
+cloud -left-> oracle_cloud
+
+legend
+    All IP-adresses are internal.
+    IP adresses in <color:#blue>blue</color> indicate devices connected via Tailscale.
+    Only the Minecraft server port is exposed to the internet.
+endlegend
 
 footer %filename() rendered with PlantUML version %version()\nThe Hitchhiker’s Guide to PlantUML
 @enduml
